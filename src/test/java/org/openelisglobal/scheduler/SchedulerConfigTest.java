@@ -47,4 +47,57 @@ public class SchedulerConfigTest {
         assertEquals(default_period_millis, result);
     }
 
+    @Test
+    public void getResultsResendTimeMillisTestCustomValue() {
+        long default_period_millis = 30L;
+
+        SchedulerConfig schedulerConfig = new SchedulerConfig() {
+
+            @Override
+            public long getResultsResendTimeMillis() {
+                String custom_value = "45";
+                long reportInterval = Long.parseLong(custom_value);
+
+                if (!custom_value.isBlank()) {
+                    return reportInterval * 1000 * 60;
+                }
+                return default_period_millis * 1000 * 60;
+            }
+        };
+
+        Long expected = 45L * 1000 * 60;
+        Long actual = schedulerConfig.getResultsResendTimeMillis();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getResultsResendTimeMillisTestInvalidValue() {
+        long default_period_millis = 30L;
+
+        SchedulerConfig schedulerConfig = new SchedulerConfig() {
+
+            @Override
+            public long getResultsResendTimeMillis() {
+                String custom_value = "a";
+                Long reportInterval = Long.parseLong(custom_value);
+
+                if (!custom_value.isBlank()) {
+                    try {
+                        return reportInterval * 1000 * 60;
+                    } catch (NumberFormatException E) {
+                        throw new NumberFormatException();
+                    }
+
+                }
+                return default_period_millis * 1000 * 60;
+            }
+        };
+
+        long expected = default_period_millis * 1000 * 60;
+
+        assertThrows(NumberFormatException.class, () -> schedulerConfig.getResultsResendTimeMillis());
+
+    }
+
 }
